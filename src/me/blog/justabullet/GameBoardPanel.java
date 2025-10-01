@@ -28,7 +28,9 @@ public class GameBoardPanel extends JPanel implements ActionListener {
 	private boolean isFallingDone = false;
 	private boolean isStarted = false;
 	private boolean isPaused = false;
+	private boolean isGameOver = false;
 	private int currentScore = 0; // removed lines == score
+	private int pieceCount = 0; // number of pieces placed
 
 	// position of current block
 	private int curX = 0;
@@ -50,7 +52,7 @@ public class GameBoardPanel extends JPanel implements ActionListener {
 	public GameBoardPanel(GameWindow tetrisFrame, int timerResolution) {
 
 		setFocusable(true);
-		setBackground(new Color(0, 30, 30));
+		setBackground(new Color(248, 250, 252)); // Light modern background
 		curBlock = new Tetromino();
 		timer = new Timer(timerResolution, this);
 		timer.start(); 	// activate timer
@@ -58,12 +60,12 @@ public class GameBoardPanel extends JPanel implements ActionListener {
 
 		gameBoard = new Tetrominoes[BoardWidth * BoardHeight];
 
-		// colour of tetrominoes
+		// colour of tetrominoes - FinTechCo blue/purple gradient theme
 		colorTable = new Color[] {
-				new Color(0, 0, 0), 	  new Color(238, 64, 53),
-				new Color(243, 119, 54),  new Color(255, 201, 14),
-				new Color(123, 192, 67),  new Color(3, 146, 207),
-				new Color(235, 214, 135), new Color(164, 135, 235)
+				new Color(0, 0, 0), 	  new Color(157, 180, 255),  // light blue
+				new Color(107, 127, 245), new Color(123, 104, 238),  // medium blue to purple
+				new Color(138, 119, 255), new Color(99, 102, 241),   // purple variations
+				new Color(79, 70, 229),   new Color(109, 123, 255)   // deep purple to blue
 		};
 
 		// keyboard listener
@@ -159,7 +161,9 @@ public class GameBoardPanel extends JPanel implements ActionListener {
 
 		isStarted = true;
 		isFallingDone = false;
+		isGameOver = false;
 		currentScore = 0;
+		pieceCount = 0;
 		initBoard();
 
 		newTetromino();
@@ -207,10 +211,18 @@ public class GameBoardPanel extends JPanel implements ActionListener {
 			currentLevel = "";
 		}
 
-		g.setColor(Color.WHITE);
-		g.setFont(new Font("Consolas", Font.PLAIN, 28));
+		g.setColor(new Color(44, 62, 80)); // Dark charcoal color matching logo
+		g.setFont(new Font("SansSerif", Font.BOLD, 28));
 		g.drawString(currentStatus, 15, 35);
 		g.drawString(currentLevel, 15, 70);
+		g.drawString("Pieces: " + pieceCount, 15, 105);
+
+		// Display game over message
+		if (isGameOver) {
+			g.setColor(new Color(79, 70, 229)); // Deep purple from theme
+			g.setFont(new Font("SansSerif", Font.BOLD, 36));
+			g.drawString("GAME OVER", 40, 400);
+		}
 
 		Dimension size = getSize();
 		int boardTop = (int) size.getHeight() - BoardHeight * blockHeight();
@@ -331,6 +343,7 @@ public class GameBoardPanel extends JPanel implements ActionListener {
 			curBlock.setShape(Tetrominoes.NO_BLOCK);
 			timer.stop();
 			isStarted = false;
+			isGameOver = true;
 		}
 	}
 
@@ -341,6 +354,7 @@ public class GameBoardPanel extends JPanel implements ActionListener {
 			gameBoard[(y * BoardWidth) + x] = curBlock.getShape();
 		}
 
+		pieceCount++; // increment piece counter when piece is placed
 		removeFullLines();
 
 		if (!isFallingDone) {
